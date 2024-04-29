@@ -19,7 +19,7 @@ auth = firebase.auth()
 
 
 class UserWidget(ft.Column):
-    def __init__(self, title, sub_title, btn_name, func=None):
+    def __init__(self, title, sub_title, btn_name, func):
         super().__init__()
         self.func = func
         self.horizontal_alignment = 'center'
@@ -50,7 +50,7 @@ class UserWidget(ft.Column):
             padding=15,
             content=ft.Text(
                 self.title,
-                size=15,
+                size=25,
                 text_align='center',
                 weight='bold',
                 color="black"
@@ -60,7 +60,7 @@ class UserWidget(ft.Column):
             alignment=ft.alignment.center,
             content=ft.Text(
                 self.sub_title,
-                size=10,
+                size=12,
                 text_align='center',
                 weight='bold',
                 color="black"
@@ -74,7 +74,7 @@ class UserWidget(ft.Column):
                     ft.Image(
                         src="./assets/chesf.png",
                         width=148,
-                        height=60
+                        height=50
                     ),]),
             self._title,
             self._sub_title,
@@ -82,7 +82,7 @@ class UserWidget(ft.Column):
                 spacing=12,
                 controls=[
                     self.input_text_field('E-mail', False),
-                    self.input_text_field('Password', True),
+                    self.input_text_field('Senha', True),
                 ],
             ),
             ft.Container(padding=5),
@@ -226,7 +226,7 @@ def main(page: ft.Page):
             spacing=25,
             controls=[
                 _sign_in_main,
-                _reg_main
+                #_reg_main
             ]
         )
     )
