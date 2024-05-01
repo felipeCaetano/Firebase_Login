@@ -22,7 +22,7 @@ class UserWidget(ft.Column):
     def __init__(self, title, sub_title, btn_name, func):
         super().__init__()
         self.func = func
-        self.horizontal_alignment = 'center'
+        self.horizontal_alignment = ft.MainAxisAlignment.CENTER
         self.title = title
         self.sub_title = sub_title
         self.btn_name = btn_name
@@ -223,6 +223,7 @@ def main(page: ft.Page):
     page.add(
         ft.Row(
             alignment='center',
+            vertical_alignment='center',
             spacing=25,
             controls=[
                 _sign_in_main,
