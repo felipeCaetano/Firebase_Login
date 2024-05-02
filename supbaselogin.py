@@ -1,17 +1,17 @@
 import os
-import traceback
 
 import flet as ft
-from gotrue.errors import AuthApiError
-from supabase import create_client, Client
+import gotrue
 from dotenv import load_dotenv
+from gotrue.errors import AuthApiError
+from supabase import create_client
 
 load_dotenv()
 
 
 def get_supabase_object():
-    url: str = "https://fxoyfmdeqmbncgzedrsq.supabase.co"
-    key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4b3lmbWRlcW1ibmNnemVkcnNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTQ0ODYyOTUsImV4cCI6MjAzMDA2MjI5NX0.bZ_B7fO6T0eLOvVpy6iKSI_0obSowxxp21Z82qqRs9A"
+    url: str = os.environ['SUPABASE_URL']
+    key: str = os.environ['SUPABASE_KEY']
 
     supabase = create_client(url, key)
     return supabase
@@ -40,7 +40,6 @@ button_style = {
     "bgcolor": "#55a271",
     "style": ft.ButtonStyle(shape={"": ft.RoundedRectangleBorder(radius=5)}),
     "color": "white",
-
 }
 
 
@@ -62,16 +61,20 @@ class Body(ft.Container):
         super().__init__(**body_style)
         self.email = Input(password=False)
         self.password = Input(password=True)
+        self.name = Input(password=False)
         self.content = ft.Column(
             spacing=4,
             controls=[
                 ft.Image(src='assets/chesf.png', width=148, height=50),
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                ft.Text(title, size=25, color="#55a271", weight='bold',
-                        text_align='center'),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                ft.Text(
+                    title, size=25, color="#55a271", weight=ft.FontWeight.BOLD,
+                    text_align=ft.TextAlign.CENTER
+                ),
                 ft.Divider(height=10, color=ft.colors.GREEN_ACCENT),
                 ft.Divider(height=20, color=ft.colors.TRANSPARENT),
+
+                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                 ft.Text("Email", size=12),
                 self.email,
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
@@ -88,7 +91,8 @@ class Body(ft.Container):
                                    ft.TextSpan(
                                        msg2,
                                        style=ft.TextStyle(
-                                           weight='bold'),
+                                           weight=ft.FontWeight.BOLD
+                                       ),
                                        on_click=lambda _: self.page.go(route)
                                    )
                                ]
@@ -105,14 +109,20 @@ class Body(ft.Container):
             end=ft.alignment.bottom_center,
             colors=[ft.colors.WHITE, ft.colors.GREEN_50],
         )
+        if btn_name == 'Cadastrar':
+            self.content.controls.insert(
+                5,
+                ft.Divider(height=10, color=ft.colors.TRANSPARENT))
+            self.content.controls.insert(6, ft.Text("Seu Nome", size=12))
+            self.content.controls.insert(7, self.name)
 
 
 class LogInPage(ft.View):
     def __init__(self, page: ft.Page, supabase):
         super().__init__(
             route="/login-user",
-            vertical_alignment='center',
-            horizontal_alignment='center'
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
         )
         self.page = page
         self.supabase = supabase
@@ -137,29 +147,35 @@ class LogInPage(ft.View):
     def log_user_in(self, event):
         if self.body.email.value != "" and self.body.password.value != "":
             try:
-                data = self.supabase.auth.sign_in_with_password(
+                data: gotrue.AuthResponse = self.supabase.auth.sign_in_with_password(
                     {
                         "email": self.body.email.value,
                         "password": self.body.password.value,
                     }
                 )
+
                 self.body.email.value = ""
                 self.body.password.value = ""
-                self.page.data = data
+
+                # acess_token = data.session.access_token
+                # expires_in = data.session.expires_in
+                # user_id = data.user.id
+                # user_email = data.user.email
+                # user_metadata = data.user.user_metadata
+                self.page.update()
+
                 self.page.go("/view-reg")
             except AuthApiError as e:
-                print(e)
                 if e.args[0] == "Invalid login credentials":
                     self.show_snack_bar("Login ou senha inválidos")
-            self.page.update()
 
 
 class ChangePass(ft.View):
     def __init__(self, page: ft.Page, supabase):
         super().__init__(
             route="/change-pass",
-            vertical_alignment='center',
-            horizontal_alignment='center'
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
         )
         self.page = page
         self.supabase = supabase
@@ -183,9 +199,10 @@ class ChangePass(ft.View):
                     ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                     ft.Text(
                         "Nova Senha",
-                        size=25, color="#55a271",
-                        weight='bold',
-                        text_align='center'
+                        size=25,
+                        color="#55a271",
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER
                     ),
                     ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                     ft.Divider(height=10, color=ft.colors.GREEN_ACCENT),
@@ -235,8 +252,8 @@ class CreatePage(ft.View):
     def __init__(self, page: ft.Page, supabase):
         super().__init__(
             route="/create-user",
-            vertical_alignment="center",
-            horizontal_alignment="center"
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
         )
         self.page = page
         self.supabase = supabase
@@ -254,21 +271,21 @@ class CreatePage(ft.View):
     def create_user(self, event):
         try:
             if self.body.email.value != "" and self.body.password.value != "":
-                print("Criando usuário")
                 res = self.supabase.auth.sign_up(
                     {
                         "email": self.body.email.value,
                         "password": self.body.password.value,
                     }
                 )
+
                 self.body.email.value = ""
-                self.body.password = ""
+                self.body.password.value = ""
+                self.body.name.value = ""
                 self.update()
             if self.body.email.value == "" or self.body.password == "":
                 self.show_snack_bar("Informe e-mail e senha!")
             self.page.update()
         except AuthApiError as e:
-            print(e)
             if e.args[0] == "Signup requires a valid password":
                 self.show_snack_bar("Informe a senha!")
             self.page.update()
@@ -281,14 +298,52 @@ class CreatePage(ft.View):
         self.page.snack_bar.open = True
 
 
+class ViewerRegBody(ft.Container):
+    def __init__(self):
+        super().__init__(**body_style)
+        self.content = ft.Column(
+            [ft.IconButton(ft.icons.MENU),
+             ft.Tabs(
+                 selected_index=1,
+                 animation_duration=300,
+                 tabs=[
+                     ft.Tab(
+                         text="JRM",
+                         content=ft.Container(
+                             content=ft.Text("JRM"),
+                             alignment=ft.alignment.center_left
+                         ),
+                     ),
+                     ft.Tab(
+                         text="BGI",
+                         content=ft.Text(),
+                     )
+                 ],
+                 expand=1,
+             )])
+
+        self.width = 280
+        self.height = 600
+        self.padding = 12
+        self.border_radius = 35
+        self.gradient = ft.LinearGradient(
+            begin=ft.alignment.top_center,
+            end=ft.alignment.bottom_center,
+            colors=[ft.colors.WHITE, ft.colors.GREEN_50],
+        )
+
+
 class ViewRegs(ft.View):
     def __init__(self, page, supabase):
         super().__init__(
             route="/view-reg",
-            vertical_alignment='center',
-            horizontal_alignment='center')
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         self.page = page
         self.supabase = supabase
+        self.body = ViewerRegBody()
+
+        self.controls = [self.body]
 
 
 def main(page: ft.Page):
@@ -311,7 +366,7 @@ def main(page: ft.Page):
     change_pass: ft.View = ChangePass(page, supabase)
     view_reg: ft.View = ViewRegs(page, supabase)
 
-    def route_change(route):
+    def route_change(event):
         page.views.clear()
         if page.route == "/create-user":
             page.views.append(create)
