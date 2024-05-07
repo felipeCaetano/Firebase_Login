@@ -49,8 +49,8 @@ class Button(ft.ElevatedButton):
 
 
 body_style = {
-    "width": 400,
-    "height": 420,
+    # "width": 400,
+    # "height": 420,
     "border_radius": 8,
     "padding": 10,
 }
@@ -100,8 +100,8 @@ class Body(ft.Container):
                        ]),
             ]
         )
-        self.width = 280
-        self.height = 600
+        # self.width = 280
+        # self.height = 600
         self.padding = 12
         self.border_radius = 35
         self.gradient = ft.LinearGradient(
@@ -302,28 +302,28 @@ class ViewerRegBody(ft.Container):
     def __init__(self):
         super().__init__(**body_style)
         self.content = ft.Column(
-            [ft.IconButton(ft.icons.MENU),
-             ft.Tabs(
-                 selected_index=1,
-                 animation_duration=300,
-                 tabs=[
-                     ft.Tab(
-                         text="JRM",
-                         content=ft.Container(
-                             content=ft.Text("JRM"),
-                             alignment=ft.alignment.center_left
-                         ),
-                     ),
-                     ft.Tab(
-                         text="BGI",
-                         content=ft.Text(),
-                     )
-                 ],
-                 expand=1,
-             )])
+            spacing=4,
+            expand=True,
+            controls=[
+                ft.IconButton(ft.icons.MENU),
+                ft.Tabs(
+                    selected_index=1,
+                    animation_duration=300,
+                    tabs=[
+                        ft.Tab(text="JRM",
+                               content=ft.Container(
+                                   content=ft.Text("JRM"),
+                                   alignment=ft.alignment.center_left)
+                               ),
+                        ft.Tab(text="BGI", content=ft.Text(),)
+                    ],
+                    expand=1
+                )
+            ]
+        )
 
-        self.width = 280
-        self.height = 600
+        self.width = 680
+        self.height = 720
         self.padding = 12
         self.border_radius = 35
         self.gradient = ft.LinearGradient(
@@ -380,7 +380,7 @@ def main(page: ft.Page):
         page.update()
 
     page.on_route_change = route_change
-    page.go("/create-user")
+    page.go("/view-reg")
 
 
 if __name__ == "__main__":
