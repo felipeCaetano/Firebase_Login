@@ -10,11 +10,12 @@ load_dotenv()
 
 
 def get_supabase_object():
-    url: str = os.environ['SUPABASE_URL']
-    key: str = os.environ['SUPABASE_KEY']
-
-    supabase = create_client(url, key)
-    return supabase
+    # url: str = os.environ['SUPABASE_URL']
+    # key: str = os.environ['SUPABASE_KEY']
+    #
+    # supabase = create_client(url, key)
+    # return supabase
+    pass
 
 
 input_style = {
@@ -49,10 +50,10 @@ class Button(ft.ElevatedButton):
 
 
 body_style = {
-    # "width": 400,
-    # "height": 420,
+    "width": 400,
+    "height": 420,
     "border_radius": 8,
-    "padding": 10,
+    "padding": 0,
 }
 
 
@@ -299,33 +300,102 @@ class CreatePage(ft.View):
 
 
 class ViewerRegBody(ft.Container):
-    def __init__(self):
+    def __init__(self, appbar: ft.AppBar):
         super().__init__(**body_style)
+        self.appbar = appbar
+        self.appbar.leading = ft.IconButton("menu")
+        self.appbar.title = ft.Text("Leituras dos Disjuntores")
+        self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+        self.card = ft.Card(
+            content=ft.Container(
+                width=500,
+                content=ft.Column(
+                    [
+                        ft.ListTile(
+                            title=ft.Text("One-line list tile"),
+                        ),
+                        ft.ListTile(title=ft.Text("One-line dense list tile"),
+                                    dense=True),
+                        ft.ListTile(
+                            leading=ft.Icon(ft.icons.SETTINGS),
+                            title=ft.Text("One-line selected list tile"),
+                            selected=True,
+                        ),
+                        ft.ListTile(
+                            leading=ft.Image(src="/icons/icon-192.png",
+                                             fit="contain"),
+                            title=ft.Text("One-line with leading control"),
+                        ),
+                        ft.ListTile(
+                            title=ft.Text("One-line with trailing control"),
+                            trailing=ft.PopupMenuButton(
+                                icon=ft.icons.MORE_VERT,
+                                items=[
+                                    ft.PopupMenuItem(text="Item 1"),
+                                    ft.PopupMenuItem(text="Item 2"),
+                                ],
+                            ),
+                        ),
+                        ft.ListTile(
+                            leading=ft.Icon(ft.icons.ALBUM),
+                            title=ft.Text(
+                                "One-line with leading and trailing controls"),
+                            trailing=ft.PopupMenuButton(
+                                icon=ft.icons.MORE_VERT,
+                                items=[
+                                    ft.PopupMenuItem(text="Item 1"),
+                                    ft.PopupMenuItem(text="Item 2"),
+                                ],
+                            ),
+                        ),
+                        ft.ListTile(
+                            leading=ft.Icon(ft.icons.SNOOZE),
+                            title=ft.Text(
+                                "Two-line with leading and trailing controls"),
+                            subtitle=ft.Text("Here is a second title."),
+                            trailing=ft.PopupMenuButton(
+                                icon=ft.icons.MORE_VERT,
+                                items=[
+                                    ft.PopupMenuItem(text="Item 1"),
+                                    ft.PopupMenuItem(text="Item 2"),
+                                ],
+                            ),
+                        ),
+                    ],
+                    spacing=0,
+                ),
+                padding=ft.padding.symmetric(vertical=10),
+            )
+        )
         self.content = ft.Column(
             spacing=4,
-            expand=True,
             controls=[
-                ft.IconButton(ft.icons.MENU),
-                ft.Tabs(
-                    selected_index=1,
-                    animation_duration=300,
-                    tabs=[
-                        ft.Tab(text="JRM",
-                               content=ft.Container(
-                                   content=ft.Text("JRM"),
-                                   alignment=ft.alignment.center_left)
-                               ),
-                        ft.Tab(text="BGI", content=ft.Text(),)
-                    ],
-                    expand=1
-                )
+                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                ft.Column(
+                    controls=[
+                        ft.Tabs(
+                            animation_duration=300,
+                            divider_color="black",
+                            tabs=[
+                                ft.Tab(
+                                    text="BGI",
+                                    content=ft.Text("Tá dificil fazer o q "
+                                                    "quer"),
+                                ),
+                                ft.Tab(
+                                    text="JRM",
+                                    content=ft.Text("This is Tab 3"),
+                                ),
+                            ],
+                        ),
+                    ]
+                ),
             ]
         )
-
-        self.width = 680
-        self.height = 720
-        self.padding = 12
-        self.border_radius = 35
+        # self.width = 280
+        self.height = 640
+        self.padding = 0
+        self.border_radius = 5
         self.gradient = ft.LinearGradient(
             begin=ft.alignment.top_center,
             end=ft.alignment.bottom_center,
@@ -341,9 +411,11 @@ class ViewRegs(ft.View):
             horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         self.page = page
         self.supabase = supabase
-        self.body = ViewerRegBody()
-
-        self.controls = [self.body]
+        self.page.appbar = ft.AppBar(bgcolor="green")
+        self.body = ViewerRegBody(self.page.appbar)
+        self.controls = [self.page.appbar, self.body]
+        self.spacing = 0
+        self.padding = 0
 
 
 def main(page: ft.Page):
