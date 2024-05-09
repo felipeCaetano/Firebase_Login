@@ -10,12 +10,11 @@ load_dotenv()
 
 
 def get_supabase_object():
-    # url: str = os.environ['SUPABASE_URL']
-    # key: str = os.environ['SUPABASE_KEY']
-    #
-    # supabase = create_client(url, key)
-    # return supabase
-    pass
+    url: str = os.environ['SUPABASE_URL']
+    key: str = os.environ['SUPABASE_KEY']
+
+    supabase = create_client(url, key)
+    return supabase
 
 
 input_style = {
@@ -50,8 +49,8 @@ class Button(ft.ElevatedButton):
 
 
 body_style = {
-    "width": 400,
-    "height": 420,
+    # "width": 400,
+    # "height": 420,
     "border_radius": 8,
     "padding": 0,
 }
@@ -303,72 +302,14 @@ class ViewerRegBody(ft.Container):
     def __init__(self, appbar: ft.AppBar):
         super().__init__(**body_style)
         self.appbar = appbar
+        self.expand = True
         self.appbar.leading = ft.IconButton("menu")
         self.appbar.title = ft.Text("Leituras dos Disjuntores")
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
-        self.card = ft.Card(
-            content=ft.Container(
-                width=500,
-                content=ft.Column(
-                    [
-                        ft.ListTile(
-                            title=ft.Text("One-line list tile"),
-                        ),
-                        ft.ListTile(title=ft.Text("One-line dense list tile"),
-                                    dense=True),
-                        ft.ListTile(
-                            leading=ft.Icon(ft.icons.SETTINGS),
-                            title=ft.Text("One-line selected list tile"),
-                            selected=True,
-                        ),
-                        ft.ListTile(
-                            leading=ft.Image(src="/icons/icon-192.png",
-                                             fit="contain"),
-                            title=ft.Text("One-line with leading control"),
-                        ),
-                        ft.ListTile(
-                            title=ft.Text("One-line with trailing control"),
-                            trailing=ft.PopupMenuButton(
-                                icon=ft.icons.MORE_VERT,
-                                items=[
-                                    ft.PopupMenuItem(text="Item 1"),
-                                    ft.PopupMenuItem(text="Item 2"),
-                                ],
-                            ),
-                        ),
-                        ft.ListTile(
-                            leading=ft.Icon(ft.icons.ALBUM),
-                            title=ft.Text(
-                                "One-line with leading and trailing controls"),
-                            trailing=ft.PopupMenuButton(
-                                icon=ft.icons.MORE_VERT,
-                                items=[
-                                    ft.PopupMenuItem(text="Item 1"),
-                                    ft.PopupMenuItem(text="Item 2"),
-                                ],
-                            ),
-                        ),
-                        ft.ListTile(
-                            leading=ft.Icon(ft.icons.SNOOZE),
-                            title=ft.Text(
-                                "Two-line with leading and trailing controls"),
-                            subtitle=ft.Text("Here is a second title."),
-                            trailing=ft.PopupMenuButton(
-                                icon=ft.icons.MORE_VERT,
-                                items=[
-                                    ft.PopupMenuItem(text="Item 1"),
-                                    ft.PopupMenuItem(text="Item 2"),
-                                ],
-                            ),
-                        ),
-                    ],
-                    spacing=0,
-                ),
-                padding=ft.padding.symmetric(vertical=10),
-            )
-        )
         self.content = ft.Column(
+            expand=True,
             spacing=4,
+            scroll=ft.ScrollMode.ALWAYS,
             controls=[
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                 ft.Column(
@@ -379,8 +320,7 @@ class ViewerRegBody(ft.Container):
                             tabs=[
                                 ft.Tab(
                                     text="BGI",
-                                    content=ft.Text("Tá dificil fazer o q "
-                                                    "quer"),
+                                    content=ft.Column(spacing=2),
                                 ),
                                 ft.Tab(
                                     text="JRM",
@@ -393,7 +333,7 @@ class ViewerRegBody(ft.Container):
             ]
         )
         # self.width = 280
-        self.height = 640
+        # self.height = 640
         self.padding = 0
         self.border_radius = 5
         self.gradient = ft.LinearGradient(
@@ -401,6 +341,26 @@ class ViewerRegBody(ft.Container):
             end=ft.alignment.bottom_center,
             colors=[ft.colors.WHITE, ft.colors.GREEN_50],
         )
+        self.populate_list_view()
+
+    def populate_list_view(self):
+        for i in range(9):
+            list_tile = ft.TextButton(
+                style=ft.ButtonStyle(
+                    shape=ft.ContinuousRectangleBorder()
+                ),
+                content=ft.ListTile(
+                    leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
+                    title=ft.Text(f"{8-i}/05/2024"),
+                    subtitle=ft.Text("Inspeção Realizada"),
+                    hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
+                    on_click=self.item_clicked,
+                )
+            )
+            self.content.controls[1].controls[0].tabs[0].content.controls.append(list_tile)
+
+    def item_clicked(self, event):
+        print(event.control, "clicado!")
 
 
 class ViewRegs(ft.View):
@@ -412,10 +372,62 @@ class ViewRegs(ft.View):
         self.page = page
         self.supabase = supabase
         self.page.appbar = ft.AppBar(bgcolor="green")
+        self.page.floating_action_button = ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.new_inspection)
         self.body = ViewerRegBody(self.page.appbar)
-        self.controls = [self.page.appbar, self.body]
+        self.controls = [self.page.appbar, self.body, self.page.floating_action_button]
         self.spacing = 0
         self.padding = 0
+
+    def new_inspection(self, event):
+        sename = "JRM"
+        view_cad: ft.View = ViewCad(self.page, self.supabase, sename)
+        self.page.views.append(view_cad)
+        # self.page.go(
+        #     "/cadastrar-insp"
+        # )
+        self.page.route = view_cad
+        self.page.update()
+
+
+class PressureForm(ft.Container):
+    def __init__(self, appbar, sename="SE BGI"):
+        super().__init__(**body_style)
+        self.appbar = appbar
+        self.appbar.leading = ft.IconButton("menu")
+        self.appbar.title = ft.Text(f"{sename} Cadastrar Leituras")
+        self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+        controls_list = self.create_controls(sename)
+        self.content = ft.Column(
+            controls=controls_list
+        )
+
+    def create_controls(self, sename):
+        contols_list = ft.Column()
+        if sename == "BGI":
+            pass
+        if sename == "JRM":
+            contols_list.controls=[
+                    ft.Row(
+                        controls=[
+                            ft.Column(controls=[ft.Text("Data"), Input(password=False)]),
+                            ft.Column(controls=[ft.Text("Hora"), Input(password=False)]),
+                        ]
+                    )
+                ]
+            return contols_list.controls
+
+
+class ViewCad(ft.View):
+    def __init__(self, page: ft.Page, supabase, sename="JRM"):
+        super().__init__(
+            route="/cadastrar-insp",
+            vertical_alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        self.page = page
+        self.supabase = supabase
+        self.page.appbar = ft.AppBar(bgcolor="green")
+        self.body = PressureForm(self.page.appbar, sename)
+        self.controls = [self.page.appbar, self.body]
 
 
 def main(page: ft.Page):
@@ -437,6 +449,7 @@ def main(page: ft.Page):
     login: ft.View = LogInPage(page, supabase)
     change_pass: ft.View = ChangePass(page, supabase)
     view_reg: ft.View = ViewRegs(page, supabase)
+    view_cad: ft.View = ViewCad(page, supabase)
 
     def route_change(event):
         page.views.clear()
@@ -448,6 +461,8 @@ def main(page: ft.Page):
             page.views.append(change_pass)
         if page.route == "/view-reg":
             page.views.append(view_reg)
+        # if page.route == "/cadastrar-insp":
+        #     page.views.append(view_cad)
 
         page.update()
 
