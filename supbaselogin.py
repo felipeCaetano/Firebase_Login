@@ -1,4 +1,5 @@
 import os
+import datetime
 
 import flet as ft
 import gotrue
@@ -10,11 +11,12 @@ load_dotenv()
 
 
 def get_supabase_object():
-    url: str = os.environ['SUPABASE_URL']
-    key: str = os.environ['SUPABASE_KEY']
-
-    supabase = create_client(url, key)
-    return supabase
+    # url: str = os.environ['SUPABASE_URL']
+    # key: str = os.environ['SUPABASE_KEY']
+    #
+    # supabase = create_client(url, key)
+    # return supabase
+    pass
 
 
 input_style = {
@@ -30,8 +32,8 @@ input_style = {
 
 
 class Input(ft.TextField):
-    def __init__(self, password):
-        super().__init__(**input_style, password=password)
+    def __init__(self, password, on_focus=None):
+        super().__init__(**input_style, on_focus=on_focus, password=password)
 
 
 button_style = {
@@ -351,13 +353,14 @@ class ViewerRegBody(ft.Container):
                 ),
                 content=ft.ListTile(
                     leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
-                    title=ft.Text(f"{8-i}/05/2024"),
+                    title=ft.Text(f"{8 - i}/05/2024"),
                     subtitle=ft.Text("Inspeção Realizada"),
                     hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
                     on_click=self.item_clicked,
                 )
             )
-            self.content.controls[1].controls[0].tabs[0].content.controls.append(list_tile)
+            self.content.controls[1].controls[0].tabs[
+                0].content.controls.append(list_tile)
 
     def item_clicked(self, event):
         print(event.control, "clicado!")
@@ -372,48 +375,86 @@ class ViewRegs(ft.View):
         self.page = page
         self.supabase = supabase
         self.page.appbar = ft.AppBar(bgcolor="green")
-        self.page.floating_action_button = ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.new_inspection)
+        self.page.floating_action_button = ft.FloatingActionButton(
+            icon=ft.icons.ADD, on_click=self.new_inspection)
         self.body = ViewerRegBody(self.page.appbar)
-        self.controls = [self.page.appbar, self.body, self.page.floating_action_button]
+        self.controls = [self.page.appbar, self.body,
+                         self.page.floating_action_button]
         self.spacing = 0
         self.padding = 0
 
     def new_inspection(self, event):
         sename = "JRM"
         view_cad: ft.View = ViewCad(self.page, self.supabase, sename)
-        self.page.views.append(view_cad)
-        # self.page.go(
-        #     "/cadastrar-insp"
-        # )
-        self.page.route = view_cad
-        self.page.update()
+        self.page.go(
+            "/cadastrar-insp"
+        )
 
 
 class PressureForm(ft.Container):
-    def __init__(self, appbar, sename="SE BGI"):
+    def __init__(self, page, sename="SE BGI"):
         super().__init__(**body_style)
-        self.appbar = appbar
+        self.alignment = ft.alignment.top_center
+        self.page = page
+        self.appbar = self.page.appbar
         self.appbar.leading = ft.IconButton("menu")
         self.appbar.title = ft.Text(f"{sename} Cadastrar Leituras")
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
         controls_list = self.create_controls(sename)
         self.content = ft.Column(
+            alignment=ft.alignment.center,
             controls=controls_list
         )
 
     def create_controls(self, sename):
+        pickednum = 0
+
+        def datepicked(e):
+            date_picker.pick_date()
+            contols_list.controls[0].controls[1].controls[1].focus()
+
+        def change_date(e):
+            print(f"Date picker changed, value is {date_picker.value}")
+            date_input_update()
+
+        def date_input_update():
+            date_input = contols_list.controls[0].controls[0].controls[1]
+            date_input.value = date_picker.value
+            date_input.update()
+
+        def date_picker_dismissed(e):
+            print(f"Date picker dismissed, value is {date_picker.value}")
+
+        date_picker = ft.DatePicker(
+            on_change=change_date,
+            on_dismiss=date_picker_dismissed,
+            first_date=datetime.datetime(2023, 10, 1),
+            last_date=datetime.datetime(2024, 10, 1),
+        )
+
+        self.page.overlay.append(date_picker)
+
         contols_list = ft.Column()
         if sename == "BGI":
             pass
         if sename == "JRM":
-            contols_list.controls=[
-                    ft.Row(
-                        controls=[
-                            ft.Column(controls=[ft.Text("Data"), Input(password=False)]),
-                            ft.Column(controls=[ft.Text("Hora"), Input(password=False)]),
-                        ]
-                    )
-                ]
+            contols_list.controls = [
+                ft.Row(
+                    expand=False,
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text("Data"),
+                                Input(
+                                    on_focus=datepicked,
+                                    password=False,
+                                )
+                            ]),
+                        ft.Column(
+                            controls=[ft.Text("Hora"), Input(password=False)]),
+                    ]
+                )
+            ]
             return contols_list.controls
 
 
@@ -426,7 +467,7 @@ class ViewCad(ft.View):
         self.page = page
         self.supabase = supabase
         self.page.appbar = ft.AppBar(bgcolor="green")
-        self.body = PressureForm(self.page.appbar, sename)
+        self.body = PressureForm(self.page, sename)
         self.controls = [self.page.appbar, self.body]
 
 
@@ -435,7 +476,6 @@ def main(page: ft.Page):
     theme.page_transitions.macos = ft.PageTransitionTheme.NONE
     page.theme = theme
     page.title = "Flet With Supabase"
-    # page.bgcolor = '#f0f3f6'
     page.horizontal_alignment = ft.MainAxisAlignment.CENTER
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
     page.bgcolor = "#202020"
@@ -461,8 +501,8 @@ def main(page: ft.Page):
             page.views.append(change_pass)
         if page.route == "/view-reg":
             page.views.append(view_reg)
-        # if page.route == "/cadastrar-insp":
-        #     page.views.append(view_cad)
+        if page.route == "/cadastrar-insp":
+            page.views.append(view_cad)
 
         page.update()
 
