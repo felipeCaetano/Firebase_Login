@@ -33,11 +33,25 @@ class PressureForm(ft.Container):
 
         def date_input_update():
             date_input = contols_list.controls[0].controls[0].controls[1]
-            date_input.value = date_picker.value
+            date_input.value = str(date_picker.value.strftime("%d/%m/%Y"))[0:10]
             date_input.update()
 
         def date_picker_dismissed(e):
             print(f"Date picker dismissed, value is {date_picker.value}")
+
+        def change_time(e):
+            print(f"Time picker changed, value (minute) is {time_picker.value.minute}")
+
+        def dismissed(e):
+            print(f"Time picker dismissed, value is {time_picker.value}")
+
+        time_picker = ft.TimePicker(
+            confirm_text="Confirm",
+            error_invalid_text="Time out of range",
+            help_text="Pick your time slot",
+            on_change=change_time,
+            on_dismiss=dismissed,
+        )
 
         date_picker = ft.DatePicker(
             on_change=change_date,
@@ -64,8 +78,8 @@ class PressureForm(ft.Container):
                                     password=False,
                                 )
                             ]),
-                        ft.Column(
-                            controls=[ft.Text("Hora"), Input(password=False)]),
+                        ft.Column(controls=[ft.Text("Hora"), Input(password=False, on_focus=None)]),
+                        ft.Column(controls=[ft.Text("Temperatura"), Input(password=False, on_focus=None)]),
                     ]
                 )
             ]
