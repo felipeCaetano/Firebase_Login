@@ -13,8 +13,13 @@ input_style = {
 
 
 class Input(ft.TextField):
-    def __init__(self, password, on_focus=None):
-        super().__init__(**input_style, on_focus=on_focus, password=password)
+    def __init__(self, password, width=135):
+        super().__init__(**input_style, password=password, width=width)
+
+
+class InputWithSuffix(ft.TextField):
+    def __init__(self, suffix: ft.IconButton):
+        super().__init__(**input_style, suffix=suffix)
 
 
 button_style = {
