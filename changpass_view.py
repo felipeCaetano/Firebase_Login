@@ -1,5 +1,5 @@
 import flet as ft
-from gotrue.errors import AuthApiError
+import gotrue.errors
 
 from generalcontrols import Input, Button
 
@@ -67,7 +67,7 @@ class ChangePass(ft.View):
         try:
             self.supabase.auth.reset_password_email(self.email.value)
             self.page.go('/login-user')
-        except AuthApiError as e:
+        except gotrue.errors.AuthApiError as e:
             if e.args[0] == "Password recovery requires an email":
                 self.show_snack_bar("Insira seu email!")
             if e.args[0] == "Unable to validate email address: invalid format":

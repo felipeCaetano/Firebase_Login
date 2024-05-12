@@ -40,3 +40,10 @@ class Disjuntor(ft.Container):
         if any([value == "" for value in press]):
             raise Exception("Não pode ter pressão vazia")
         return press
+
+    def clear_press(self):
+        if self.press_num > 1:
+            for col in self.press_fields.controls:
+                col.controls[1].value = ""
+        else:
+            self.press_fields.controls[0].value = ""

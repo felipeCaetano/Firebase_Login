@@ -33,12 +33,7 @@ class PressureForm(ft.Container):
             )[0:10]
             date_input.update()
 
-        def date_picker_dismissed(e):
-            print(f"Date picker dismissed, value is {date_picker.value}")
-
         def change_time(e):
-            print(
-                f"Time picker changed, value (minute) is {time_picker.value.minute}")
             time_input_update()
 
         def time_input_update():
@@ -46,20 +41,15 @@ class PressureForm(ft.Container):
             time_input.value = str(time_picker.value)
             time_input.update()
 
-        def dismissed(e):
-            print(f"Time picker dismissed, value is {time_picker.value}")
-
         time_picker = ft.TimePicker(
             confirm_text="Confirm",
             error_invalid_text="Time out of range",
             help_text="Pick your time slot",
             on_change=change_time,
-            on_dismiss=dismissed,
         )
 
         date_picker = ft.DatePicker(
             on_change=change_date,
-            on_dismiss=date_picker_dismissed,
             first_date=datetime.datetime(2023, 10, 1),
             last_date=datetime.datetime(2024, 10, 1),
         )
@@ -95,10 +85,13 @@ class PressureForm(ft.Container):
                                           )
                                       )
                                   ]),
-                        ft.Column(expand=1,
-                                  controls=[
-                                      ft.Text("Temperatura"),
-                                      Input(password=False)]),
+                        ft.Column(
+                            expand=1,
+                            controls=[
+                                ft.Text("Temperatura"),
+                                Input(password=False)
+                            ]
+                        ),
                     ]
                 ),
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
@@ -108,18 +101,13 @@ class PressureForm(ft.Container):
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                 Disjuntor("12M7", 1),
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                ft.Row(
-                    controls=[
-                        Button("Enviar", self.save_form)
-                    ]
-                )
             ]
             return contols_list.controls
 
-    def save_form(self, event):
-        self.get_form_fields()
+
 
     def get_form_fields(self):
+        press1 = press2 = press3 = None
         data = self.content.controls[0].controls[0].controls[1].value
         hora = self.content.controls[0].controls[1].controls[1].value
         temp = self.content.controls[0].controls[2].controls[1].value
@@ -132,10 +120,22 @@ class PressureForm(ft.Container):
             press3 = disj3.get_press()
             print(data, hora, temp, press1, press2, press3, sep='\n')
         except Exception:
-            self.page.snack_bar = ft.SnackBar(content=ft.Text(str(Exception)))
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text("Os campos não podem estar vazios!")
+            )
             self.page.snack_bar.open = True
             self.page.update()
         # print(data, hora, temp, press1,press2, press3, sep='\n')
+        return (data, hora, temp, press1, press2, press3)
+
+    def clear_fields(self):
+        self.content.controls[0].controls[0].controls[1].value = ""
+        self.content.controls[0].controls[1].controls[1].value = ""
+        self.content.controls[0].controls[2].controls[1].value = ""
+        self.content.controls[2].clear_press()
+        self.content.controls[4].clear_press()
+        self.content.controls[6].clear_press()
+        self.page.update()
 
 
 class InspectionPage(ft.View):
@@ -148,4 +148,11 @@ class InspectionPage(ft.View):
         self.supabase = supabase
         self.page.appbar = ft.AppBar(bgcolor="green")
         self.body = PressureForm(self.page, sename)
-        self.controls = [self.page.appbar, self.body]
+        self.controls = [
+            self.page.appbar,
+            self.body,
+            ft.Row(controls=[Button("Enviar", self.save_form)])]
+
+    def save_form(self, event):
+        data, hora, temp, press1, press2, press3 = self.body.get_form_fields()
+        self.body.clear_fields()
