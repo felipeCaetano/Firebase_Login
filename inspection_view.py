@@ -3,7 +3,7 @@ import datetime
 import flet as ft
 
 from disjuntor_view import Disjuntor
-from email_server import get_email_server
+from email_server import get_email_server, create_email_menssage
 from generalcontrols import body_style, Input, InputWithSuffix, Button
 
 
@@ -143,6 +143,7 @@ class InspectionPage(ft.View):
             route="/cadastrar-insp",
             vertical_alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        self.sename = sename
         self.page = page
         self.supabase = supabase
         self.page.appbar = ft.AppBar(bgcolor="green")
@@ -159,8 +160,15 @@ class InspectionPage(ft.View):
 
     def send_mail(self, data, hora, temp, press1, press2, press3):
         email_server = get_email_server()
-        email_server.sendmail(
-            "registrabgi@gmail.com",
-            "felipecmelo@gmail.com",
-            "Email de testes"
-        )
+        msg = create_email_menssage(self.sename, data, hora, temp, press1, press2, press3)
+        try:
+            email_server.sendmail(
+                "registrabgi@outlook.com",
+                "felipecmelo@gmail.com",
+                msg.as_string()
+            )
+        except Exception as e:
+            print(f"a menssagem falhou {e}")
+        finally:
+            email_server.quit()
+
