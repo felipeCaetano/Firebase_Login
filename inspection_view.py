@@ -3,6 +3,7 @@ import datetime
 import flet as ft
 
 from disjuntor_view import Disjuntor
+from email_server import get_email_server
 from generalcontrols import body_style, Input, InputWithSuffix, Button
 
 
@@ -104,8 +105,6 @@ class PressureForm(ft.Container):
             ]
             return contols_list.controls
 
-
-
     def get_form_fields(self):
         press1 = press2 = press3 = None
         data = self.content.controls[0].controls[0].controls[1].value
@@ -155,4 +154,13 @@ class InspectionPage(ft.View):
 
     def save_form(self, event):
         data, hora, temp, press1, press2, press3 = self.body.get_form_fields()
+        self.send_mail(data, hora, temp, press1, press2, press3)
         self.body.clear_fields()
+
+    def send_mail(self, data, hora, temp, press1, press2, press3):
+        email_server = get_email_server()
+        email_server.sendmail(
+            "registrabgi@gmail.com",
+            "felipecmelo@gmail.com",
+            "Email de testes"
+        )
