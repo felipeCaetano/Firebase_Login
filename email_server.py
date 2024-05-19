@@ -13,7 +13,11 @@ class EmailService:
         email_server = get_email_server()
         msg = create_email_menssage(sename, data, hora, temp, press1, press2, press3)
         try:
-            email_server.sendmail(os.environ["EMAIL_URL"], "felipecmelo@gmail.com", msg.as_string())
+            print(msg.as_string())
+            email_server.sendmail(
+                os.environ["EMAIL_URL"],
+                "felipecmelo@gmail.com",
+                msg.as_string())
         except Exception as e:
             print(f"A mensagem falhou: {e}")
         finally:

@@ -45,12 +45,12 @@ class PressureFormUI(ft.Container):
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
 
     def create_controls(self, sename):
+        contols_list = ft.Column()
         suffix_button = ft.IconButton(
             ft.icons.CALENDAR_TODAY,
             on_click=lambda _: self.date_picker.pick_date()
         )
         date_field = InputWithSuffix(suffix_button)
-        contols_list = ft.Column()
         if sename == "BGI":
             pass
         if sename == "JRM":
@@ -98,6 +98,7 @@ class PressureFormUI(ft.Container):
         hora = self.content.controls[0].controls[1].controls[1].value
         temp = self.content.controls[0].controls[2].controls[1].value
         disj1: Disjuntor = self.content.controls[2]
+        print("DISJUNTOR: ", disj1)
         disj2: Disjuntor = self.content.controls[4]
         disj3: Disjuntor = self.content.controls[6]
         press1 = disj1.get_press()

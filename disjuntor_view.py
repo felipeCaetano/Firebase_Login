@@ -7,12 +7,14 @@ def _create_pressure_fields(press_num):
     row = ft.Row()
     for i in range(press_num):
         if press_num > 1:
-            row.controls.append(ft.Column(
-                controls=[
-                    ft.Text(f"Fase {'ABC'[i]}"),
-                    Input(password=None, width=45)
-                ]
-            ))
+            row.controls.append(
+                ft.Column(
+                    controls=[
+                        ft.Text(f"Fase {'ABC'[i]}"),
+                        Input(password=None, width=45)
+                    ]
+                )
+            )
         else:
             row.controls.append(Input(password=None, width=45))
     return row
@@ -62,12 +64,12 @@ class Disjuntor(ft.Container):
         self.content = self.ui.content
 
     def get_press(self):
-        self.controller.get_press()
+        return self.controller.get_press()
 
     def clear_press(self):
         self.controller.clear_press()
 
-    def __repr__(self):
+    def __str__(self):
         press_values = self.controller.get_press()
         press_values_str = ', '.join(press_values)
-        return f"Disjuntor {self.ui.name}, {press_values_str}\n"
+        return f"{self.ui.name} - Pressão SF6 {press_values_str} bar (Nominal a 20°C 8,0 bar)\nobs: Complementado SF6 pela última vez em 09.04.24\n"
