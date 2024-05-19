@@ -8,10 +8,21 @@ import smtplib
 load_dotenv()
 
 
+class EmailService:
+    def send_mail(self, sename, data, hora, temp, press1, press2, press3):
+        email_server = get_email_server()
+        msg = create_email_menssage(sename, data, hora, temp, press1, press2, press3)
+        try:
+            email_server.sendmail(os.environ["EMAIL_URL"], "felipecmelo@gmail.com", msg.as_string())
+        except Exception as e:
+            print(f"A mensagem falhou: {e}")
+        finally:
+            email_server.quit()
+
+
 def account_login(email_server):
     email = os.environ["EMAIL_URL"]
     password = os.environ["EMAIL_KEY"]
-    print(email, password)
     email_server.login(email, password)
 
 

@@ -1,3 +1,5 @@
+import datetime
+
 import flet as ft
 
 input_style = {
@@ -13,7 +15,7 @@ input_style = {
 
 
 class Input(ft.TextField):
-    def __init__(self, password, width=135):
+    def __init__(self, password, width=255):
         super().__init__(**input_style, password=password, width=width)
 
 
@@ -103,3 +105,18 @@ class Body(ft.Container):
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT))
             self.content.controls.insert(6, ft.Text("Seu Nome", size=12))
             self.content.controls.insert(7, self.name)
+
+
+class PickDate(ft.DatePicker):
+    def __init(self, on_change):
+        super().__init__(on_change=on_change)
+        self.first_date = datetime.datetime(2023, 10, 1),
+        self.last_date = datetime.datetime(2024, 10, 1),
+
+
+class TimePicker(ft.TimePicker):
+    def __init__(self, on_change):
+        super().__init__(on_change=on_change)
+        self.confirm_text = "Confirmar"
+        self.error_invalid_text = "Hora fora de alcance"
+        self.help_text = "Escolha a hora."

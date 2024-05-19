@@ -1,66 +1,53 @@
-import datetime
-
 import flet as ft
 
 from disjuntor_view import Disjuntor
-from email_server import get_email_server, create_email_menssage
-from generalcontrols import body_style, Input, InputWithSuffix, Button
+from email_server import EmailService
+from generalcontrols import body_style, Input, InputWithSuffix, Button, PickDate, TimePicker
 
 
-class PressureForm(ft.Container):
-    def __init__(self, page, sename="SE BGI"):
+class Controller:
+    def __init__(self, form):
+        self.ui = form
+
+    def process_form(self):
+        try:
+            data, hora, temp, press1, press2, press3 = self.ui.get_form_fields()
+            return True, data, hora, temp, press1, press2, press3
+        except Exception as e:
+            self.ui.page.snack_bar = ft.SnackBar(
+                content=ft.Text(str(e))
+            )
+            self.ui.page.snack_bar.open = True
+            self.ui.page.update()
+            return False, None, None, None, None, None, None
+
+
+class PressureFormUI(ft.Container):
+    def __init__(self, page, date_update, time_update, sename="SE BGI"):
         super().__init__(**body_style)
-        self.alignment = ft.alignment.top_center
         self.page = page
+        self.date_update = date_update
+        self.time_update = time_update
+        self.alignment = ft.alignment.top_center
         self.appbar = self.page.appbar
-        self.appbar.leading = ft.IconButton("menu")
-        self.appbar.title = ft.Text(f"{sename} Cadastrar Leituras")
-        self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+        self.customize_appbar(sename)
+        self.time_picker = TimePicker(on_change=self.time_update)
+        self.date_picker = PickDate(on_change=self.date_update)
+        self.page.overlay.append(self.time_picker)
+        self.page.overlay.append(self.date_picker)
+        self.page.update()
         controls_list = self.create_controls(sename)
-        self.content = ft.Column(
-            # alignment=ft.alignment.center,
-            controls=controls_list
-        )
+        self.content = ft.Column(controls=controls_list)
+
+    def customize_appbar(self, sename):
+        self.appbar.leading = ft.IconButton(ft.icons.MENU)
+        self.appbar.title = ft.Text(f"SE {sename} Cadastrar Leituras")
+        self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
 
     def create_controls(self, sename):
-        def change_date(e):
-            print(f"Date picker changed, value is {date_picker.value}")
-            date_input_update()
-
-        def date_input_update():
-            date_input = contols_list.controls[0].controls[0].controls[1]
-            date_input.value = str(
-                date_picker.value.strftime("%d/%m/%Y")
-            )[0:10]
-            date_input.update()
-
-        def change_time(e):
-            time_input_update()
-
-        def time_input_update():
-            time_input = contols_list.controls[0].controls[1].controls[1]
-            time_input.value = str(time_picker.value)
-            time_input.update()
-
-        time_picker = ft.TimePicker(
-            confirm_text="Confirm",
-            error_invalid_text="Time out of range",
-            help_text="Pick your time slot",
-            on_change=change_time,
-        )
-
-        date_picker = ft.DatePicker(
-            on_change=change_date,
-            first_date=datetime.datetime(2023, 10, 1),
-            last_date=datetime.datetime(2024, 10, 1),
-        )
-
-        self.page.overlay.append(time_picker)
-        self.page.overlay.append(date_picker)
-        self.page.update()
         suffix_button = ft.IconButton(
             ft.icons.CALENDAR_TODAY,
-            on_click=lambda _: date_picker.pick_date()
+            on_click=lambda _: self.date_picker.pick_date()
         )
         date_field = InputWithSuffix(suffix_button)
         contols_list = ft.Column()
@@ -82,7 +69,7 @@ class PressureForm(ft.Container):
                                           ft.IconButton(
                                               icon=ft.icons.ACCESS_TIME,
                                               on_click=lambda
-                                                  _: time_picker.pick_time()
+                                                  _: self.time_picker.pick_time()
                                           )
                                       )
                                   ]),
@@ -113,19 +100,10 @@ class PressureForm(ft.Container):
         disj1: Disjuntor = self.content.controls[2]
         disj2: Disjuntor = self.content.controls[4]
         disj3: Disjuntor = self.content.controls[6]
-        try:
-            press1 = disj1.get_press()
-            press2 = disj2.get_press()
-            press3 = disj3.get_press()
-            print(data, hora, temp, press1, press2, press3, sep='\n')
-        except Exception:
-            self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Os campos não podem estar vazios!")
-            )
-            self.page.snack_bar.open = True
-            self.page.update()
-        # print(data, hora, temp, press1,press2, press3, sep='\n')
-        return (data, hora, temp, press1, press2, press3)
+        press1 = disj1.get_press()
+        press2 = disj2.get_press()
+        press3 = disj3.get_press()
+        return data, hora, temp, press1, press2, press3
 
     def clear_fields(self):
         self.content.controls[0].controls[0].controls[1].value = ""
@@ -143,32 +121,31 @@ class InspectionPage(ft.View):
             route="/cadastrar-insp",
             vertical_alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER)
-        self.sename = sename
         self.page = page
         self.supabase = supabase
+        self.sename = sename
         self.page.appbar = ft.AppBar(bgcolor="green")
-        self.body = PressureForm(self.page, sename)
+        self.body = PressureFormUI(self.page, self.date_input_update, self.time_input_update, sename)
+        self.controller = Controller(self.body)
+        self.email_service = EmailService()
         self.controls = [
             self.page.appbar,
             self.body,
             ft.Row(controls=[Button("Enviar", self.save_form)])]
 
+    def date_input_update(self, event):
+        date_input = self.body.content.controls[0].controls[0].controls[1]
+        date_input.value = str(
+            self.body.date_picker.value.strftime("%d/%m/%Y"))[0:10]
+        date_input.update()
+
+    def time_input_update(self, event):
+        time_input = self.body.content.controls[0].controls[1].controls[1]
+        time_input.value = str(self.body.time_picker.value)
+        time_input.update()
+
     def save_form(self, event):
-        data, hora, temp, press1, press2, press3 = self.body.get_form_fields()
-        self.send_mail(data, hora, temp, press1, press2, press3)
-        self.body.clear_fields()
-
-    def send_mail(self, data, hora, temp, press1, press2, press3):
-        email_server = get_email_server()
-        msg = create_email_menssage(self.sename, data, hora, temp, press1, press2, press3)
-        try:
-            email_server.sendmail(
-                "registrabgi@outlook.com",
-                "felipecmelo@gmail.com",
-                msg.as_string()
-            )
-        except Exception as e:
-            print(f"a menssagem falhou {e}")
-        finally:
-            email_server.quit()
-
+        status, data, hora, temp, press1, press2, press3 = self.controller.process_form()
+        if status:
+            self.email_service.send_mail(self.sename, data, hora, temp, press1, press2, press3)
+            self.body.clear_fields()

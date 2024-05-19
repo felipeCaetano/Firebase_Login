@@ -18,7 +18,7 @@ def _create_pressure_fields(press_num):
     return row
 
 
-class Disjuntor(ft.Container):
+class DisjuntorUI(ft.Container):
     def __init__(self, name, press_num):
         super().__init__()
         self.name = name
@@ -30,20 +30,44 @@ class Disjuntor(ft.Container):
                 self.press_fields]
         )
 
+
+class Controller:
+    def __init__(self, ui):
+        self.ui = ui
+
     def get_press(self):
         press = []
-        if self.press_num > 1:
-            for col in self.press_fields.controls:
+        if self.ui.press_num > 1:
+            for col in self.ui.press_fields.controls:
                 press.append(col.controls[1].value)
         else:
-            press.append(self.press_fields.controls[0].value)
+            press.append(self.ui.press_fields.controls[0].value)
         if any([value == "" for value in press]):
-            raise Exception("Não pode ter pressão vazia")
+            raise Exception("Os campos não podem estar vazios!")
         return press
 
     def clear_press(self):
-        if self.press_num > 1:
-            for col in self.press_fields.controls:
+        if self.ui.press_num > 1:
+            for col in self.ui.press_fields.controls:
                 col.controls[1].value = ""
         else:
-            self.press_fields.controls[0].value = ""
+            self.ui.press_fields.controls[0].value = ""
+
+
+class Disjuntor(ft.Container):
+    def __init__(self, name, press_num):
+        super().__init__()
+        self.ui = DisjuntorUI(name, press_num)
+        self.controller = Controller(self.ui)
+        self.content = self.ui.content
+
+    def get_press(self):
+        self.controller.get_press()
+
+    def clear_press(self):
+        self.controller.clear_press()
+
+    def __repr__(self):
+        press_values = self.controller.get_press()
+        press_values_str = ', '.join(press_values)
+        return f"Disjuntor {self.ui.name}, {press_values_str}\n"
