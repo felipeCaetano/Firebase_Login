@@ -55,7 +55,7 @@ class Body(ft.Container):
         self.content = ft.Column(
             spacing=4,
             controls=[
-                ft.Image(src='assets/chesf.png', width=148, height=50),
+                ft.Image(src='../assets/chesf.png', width=148, height=50),
                 ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                 ft.Text(
                     title, size=25, color="#55a271", weight=ft.FontWeight.BOLD,

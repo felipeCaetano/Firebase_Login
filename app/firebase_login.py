@@ -72,7 +72,7 @@ class UserWidget(ft.Column):
                 spacing=4,
                 controls=[
                     ft.Image(
-                        src="./assets/chesf.png",
+                        src="../assets/chesf.png",
                         width=148,
                         height=50
                     ),]),
@@ -98,8 +98,8 @@ class UserWidget(ft.Column):
                             color='black'
                         )
                     ),
-                    self.SignInOption("./assets/microsoft.png", "Microsoft"),
-                    self.SignInOption("./assets/google.png", "Google")
+                    self.SignInOption("../assets/microsoft.png", "Microsoft"),
+                    self.SignInOption("../assets/google.png", "Google")
                 ]
             )
         ]
@@ -234,4 +234,4 @@ def main(page: ft.Page):
 
 
 if __name__ == '__main__':
-    ft.app(target=main, assets_dir='assets')
+    ft.app(target=main, assets_dir='../assets')

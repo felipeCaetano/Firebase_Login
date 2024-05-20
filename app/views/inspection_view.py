@@ -1,8 +1,10 @@
 import flet as ft
 
-from disjuntor_view import Disjuntor
 from email_server import EmailService
 from generalcontrols import body_style, Input, InputWithSuffix, Button, PickDate, TimePicker
+from views.disjuntor_view import Disjuntor
+
+from daos.disjuntor_dao import DisjuntorDAO
 
 
 class Controller:
@@ -54,6 +56,9 @@ class PressureFormUI(ft.Container):
         if sename == "BGI":
             pass
         if sename == "JRM":
+            dao = DisjuntorDAO()
+            disjuntor_list = dao.get_disjuntores()
+            print(f'{disjuntor_list=}')
             contols_list.controls = [
                 ft.Row(
                     controls=[
@@ -125,7 +130,7 @@ class InspectionPage(ft.View):
         self.page = page
         self.supabase = supabase
         self.sename = sename
-        self.page.appbar = ft.AppBar(bgcolor="green")
+        self.page.appbar = ft.AppBar(bgcolor=ft.colors.GREEN)
         self.body = PressureFormUI(self.page, self.date_input_update, self.time_input_update, sename)
         self.controller = Controller(self.body)
         self.email_service = EmailService()

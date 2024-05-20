@@ -8,9 +8,7 @@ class ViewerRegBody(ft.Container):
         super().__init__(**body_style)
         self.appbar = appbar
         self.expand = True
-        self.appbar.leading = ft.IconButton("menu")
-        self.appbar.title = ft.Text("Leituras dos Disjuntores")
-        self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+
         self.content = ft.Column(
             expand=True,
             spacing=4,
@@ -77,7 +75,12 @@ class MainPage(ft.View):
             horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         self.page = page
         self.supabase = supabase
+        self.drawer = ft.NavigationDrawer()
         self.page.appbar = ft.AppBar(bgcolor="green")
+        self.page.appbar.leading = ft.IconButton(ft.icons.MENU,
+                                            on_click=self.show_drawer)
+        self.page.appbar.title = ft.Text("Leituras dos Disjuntores")
+        self.page.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
         self.page.floating_action_button = ft.FloatingActionButton(
             icon=ft.icons.ADD, on_click=self.new_inspection)
         self.body = ViewerRegBody(self.page.appbar)
@@ -86,9 +89,15 @@ class MainPage(ft.View):
         self.spacing = 0
         self.padding = 0
 
+
     def new_inspection(self, event):
         sename = "JRM"
         # view_cad: ft.View = ViewCad(self.page, self.supabase, sename)
         self.page.go(
             "/cadastrar-insp"
         )
+
+    def show_drawer(self, event):
+        self.drawer.open = True
+        self.drawer.update()
+

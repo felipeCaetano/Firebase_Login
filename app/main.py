@@ -1,10 +1,10 @@
 import flet as ft
 
-from changpass_view import ChangePass
-from inspection_view import InspectionPage
-from login_view import LogInPage
-from main_view import MainPage
-from register_view import CreatePage
+from views.changpass_view import ChangePass
+from views.inspection_view import InspectionPage
+from views.login_view import LogInPage
+from views.main_view import MainPage
+from views.register_view import CreatePage
 from supabase_login import get_supabase_object
 
 

@@ -28,7 +28,7 @@ class ChangePass(ft.View):
                 spacing=4,
                 controls=[
                     ft.Image(
-                        src='assets/chesf.png', width=148, height=50
+                        src='../../assets/chesf.png', width=148, height=50
                     ),
                     ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                     ft.Text(
