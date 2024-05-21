@@ -17,7 +17,9 @@ def create_table():
                 sename TEXT NOT NULL,
                 name TEXT NOT NULL,
                 press_num INTEGER NOT NULL,
-                pressao_nominal REAL
+                pressao_nominal REAL,
+                press_oil REAL,
+                horimeter REAL
             )
         ''')
         cursor.execute('''

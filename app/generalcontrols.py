@@ -120,3 +120,27 @@ class TimePicker(ft.TimePicker):
         self.confirm_text = "Confirmar"
         self.error_invalid_text = "Hora fora de alcance"
         self.help_text = "Escolha a hora."
+
+
+class NavigationDrawer(ft.NavigationDrawer):
+    def __init__(self):
+        super().__init__()
+        self.controls = [
+            ft.Container(height=12),
+            ft.NavigationDrawerDestination(
+                label="Item 1",
+                icon=ft.icons.DOOR_BACK_DOOR_OUTLINED,
+                selected_icon_content=ft.Icon(ft.icons.DOOR_BACK_DOOR),
+            ),
+            ft.Divider(thickness=2),
+            ft.NavigationDrawerDestination(
+                icon_content=ft.Icon(ft.icons.MAIL_OUTLINED),
+                label="Item 2",
+                selected_icon=ft.icons.MAIL,
+            ),
+            ft.NavigationDrawerDestination(
+                icon_content=ft.Icon(ft.icons.PHONE_OUTLINED),
+                label="Item 3",
+                selected_icon=ft.icons.PHONE,
+            ),
+        ]

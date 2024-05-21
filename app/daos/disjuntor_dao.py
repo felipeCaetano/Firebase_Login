@@ -10,11 +10,13 @@ class DisjuntorDAO:
             cursor = conn.cursor()
             cursor.execute(
                 '''
-                INSERT INTO disjuntor (sename, name, press_num, pressao_nominal)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO disjuntor (sename, name, press_num, 
+                pressao_nominal, press_oil, horimeter)
+                VALUES (?, ?, ?, ?, ?, ?)
             ''',
                 (disjuntor.sename, disjuntor.name, disjuntor.press_num,
-                 disjuntor.pressao_nominal)
+                 disjuntor.press_nominal, disjuntor.press_oil,
+                 disjuntor.horimeter)
             )
             conn.commit()
             return cursor.lastrowid
@@ -38,10 +40,12 @@ class DisjuntorDAO:
             cursor = conn.cursor()
             cursor.execute('''
                 UPDATE disjuntor
-                SET name = ?, press_num = ?, pressao_nominal = ?
+                SET name = ?, press_num = ?, pressao_nominal = ?, press_oil 
+                = ?, horimeter = ?
                 WHERE id = ?
             ''', (disjuntor.name, disjuntor.press_num,
-                  disjuntor.press_nominal, disjuntor.id))
+                  disjuntor.press_nominal, disjuntor.press_oil,
+                  disjuntor.horimeter, disjuntor.id))
             conn.commit()
 
     def delete_disjuntor(self, disjuntor_id):

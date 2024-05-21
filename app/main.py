@@ -1,5 +1,6 @@
 import flet as ft
 
+from app.views.adddisjuntor_view import DisjuntorPage
 from views.changpass_view import ChangePass
 from views.inspection_view import InspectionPage
 from views.login_view import LogInPage
@@ -27,6 +28,7 @@ def main(page: ft.Page):
     change_pass: ft.View = ChangePass(page, supabase)
     view_reg: ft.View = MainPage(page, supabase)
     view_cad: ft.View = InspectionPage(page, supabase)
+    view_disj: ft.View = DisjuntorPage(page, supabase)
 
     def route_change(event):
         page.views.clear()
@@ -40,11 +42,13 @@ def main(page: ft.Page):
             page.views.append(view_reg)
         if page.route == "/cadastrar-insp":
             page.views.append(view_cad)
+        if page.route == "/cadastrar-disj":
+            page.views.append(view_disj)
 
         page.update()
 
     page.on_route_change = route_change
-    page.go("/view-reg")
+    page.go("/cadastrar-disj")
 
 
 if __name__ == "__main__":

@@ -58,7 +58,6 @@ class PressureFormUI(ft.Container):
         if sename == "JRM":
             dao = DisjuntorDAO()
             disjuntor_list = dao.get_disjuntores()
-            print(f'{disjuntor_list=}')
             contols_list.controls = [
                 ft.Row(
                     controls=[

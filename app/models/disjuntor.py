@@ -6,11 +6,15 @@ from app.daos.disjuntor_dao import DisjuntorDAO
 class Disjuntor:
     dao = DisjuntorDAO()
 
-    def __init__(self, sename, name, press_num, press_nominal, id=None):
+    def __init__(self, sename, name, press_num, press_nominal, press_oil,
+                 horimeter, id=None):
         self.id = id
+        self.sename =sename
         self.name = name
         self.press_num = press_num
         self.press_nominal = press_nominal
+        self.press_oil = press_oil
+        self.horimeter = horimeter
         self.last_comp = None
 
     def save(self):
@@ -31,6 +35,8 @@ class Disjuntor:
                 name=data[2],
                 press_num=data[3],
                 press_nominal=data[4],
+                press_oil=data[5],
+                horimeter=data[6],
                 id=data[0]
             )
 
