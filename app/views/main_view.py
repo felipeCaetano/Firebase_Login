@@ -2,13 +2,15 @@ import flet as ft
 
 from generalcontrols import body_style
 
+from app.controllers.bodycontroller import ViewerRegBodyController, \
+    MainPageController
+
 
 class ViewerRegBody(ft.Container):
     def __init__(self, appbar: ft.AppBar):
         super().__init__(**body_style)
         self.appbar = appbar
         self.expand = True
-
         self.content = ft.Column(
             expand=True,
             spacing=4,
@@ -19,15 +21,15 @@ class ViewerRegBody(ft.Container):
                     controls=[
                         ft.Tabs(
                             animation_duration=300,
-                            divider_color="black",
+                            divider_color=ft.colors.BLACK,
                             tabs=[
                                 ft.Tab(
                                     text="BGI",
-                                    content=ft.Column(spacing=2),
+                                    content=ft.Column(spacing=2)
                                 ),
                                 ft.Tab(
                                     text="JRM",
-                                    content=ft.Text("This is Tab 3"),
+                                    content=ft.Column(spacing=2)
                                 ),
                             ],
                         ),
@@ -35,8 +37,6 @@ class ViewerRegBody(ft.Container):
                 ),
             ]
         )
-        # self.width = 280
-        # self.height = 640
         self.padding = 0
         self.border_radius = 5
         self.gradient = ft.LinearGradient(
@@ -44,27 +44,29 @@ class ViewerRegBody(ft.Container):
             end=ft.alignment.bottom_center,
             colors=[ft.colors.WHITE, ft.colors.GREEN_50],
         )
-        self.populate_list_view()
+        self.controller = ViewerRegBodyController(self)
+        self.controller.populate_list_view()
 
-    def populate_list_view(self):
-        for i in range(9):
-            list_tile = ft.TextButton(
-                style=ft.ButtonStyle(
-                    shape=ft.ContinuousRectangleBorder()
-                ),
-                content=ft.ListTile(
-                    leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
-                    title=ft.Text(f"{8 - i}/05/2024"),
-                    subtitle=ft.Text("Inspeção Realizada"),
-                    hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
-                    on_click=self.item_clicked,
-                )
-            )
-            self.content.controls[1].controls[0].tabs[
-                0].content.controls.append(list_tile)
+    # def populate_list_view(self):
+    #     """fake method."""
+    #     for i in range(9):
+    #         list_tile = ft.TextButton(
+    #             style=ft.ButtonStyle(
+    #                 shape=ft.ContinuousRectangleBorder()
+    #             ),
+    #             content=ft.ListTile(
+    #                 leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
+    #                 title=ft.Text(f"{9 - i}/05/2024"),
+    #                 subtitle=ft.Text("Inspeção Realizada"),
+    #                 hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
+    #                 on_click=self.item_clicked,
+    #             )
+    #         )
+    #         self.content.controls[1].controls[0].tabs[
+    #             0].content.controls.append(list_tile)
 
     def item_clicked(self, event):
-        print(event.control, "clicado!")
+        self.controller.item_clicked(event)
 
 
 class MainPage(ft.View):
@@ -76,9 +78,9 @@ class MainPage(ft.View):
         self.page = page
         self.supabase = supabase
         self.drawer = ft.NavigationDrawer()
-        self.page.appbar = ft.AppBar(bgcolor="green")
+        self.page.appbar = ft.AppBar()
         self.page.appbar.leading = ft.IconButton(ft.icons.MENU,
-                                            on_click=self.show_drawer)
+                                                 on_click=self.show_drawer)
         self.page.appbar.title = ft.Text("Leituras dos Disjuntores")
         self.page.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
         self.page.floating_action_button = ft.FloatingActionButton(
@@ -88,16 +90,12 @@ class MainPage(ft.View):
                          self.page.floating_action_button]
         self.spacing = 0
         self.padding = 0
-
+        self.controller = MainPageController(self)
 
     def new_inspection(self, event):
-        sename = "JRM"
-        # view_cad: ft.View = ViewCad(self.page, self.supabase, sename)
-        self.page.go(
-            "/cadastrar-insp"
-        )
+        tab_name = self.body.controller.get_tab_name()
+        self.controller.new_inspection(event, tab_name)
 
     def show_drawer(self, event):
         self.drawer.open = True
         self.drawer.update()
-

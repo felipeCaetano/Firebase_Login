@@ -27,6 +27,13 @@ class DisjuntorDAO:
             cursor.execute('SELECT * FROM disjuntor')
             return cursor.fetchall()
 
+    def get_disjuntores_by_se(self, sename):
+        with connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM disjuntor WHERE sename = ?', (sename,)
+                           )
+            return cursor.fetchall()
+
     def get_disjuntor_by_id(self, disjuntor_id):
         with connect() as conn:
             cursor = conn.cursor()

@@ -17,10 +17,6 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.MainAxisAlignment.CENTER
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
     page.bgcolor = "#202020"
-    page.snack_bar = ft.SnackBar(
-        content=ft.Text("Hello, world!"),
-        action="Alright!",
-    )
 
     supabase = get_supabase_object()
     create: ft.View = CreatePage(page, supabase)
@@ -48,7 +44,7 @@ def main(page: ft.Page):
         page.update()
 
     page.on_route_change = route_change
-    page.go("/cadastrar-disj")
+    page.go("/view-reg")
 
 
 if __name__ == "__main__":

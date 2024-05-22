@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitura de Disjuntores</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f2f2f2;">
+    <h2>Boa Tarde,</h2>
+    <br>
+    <p>Seguem leitura dos disjuntores da SE {{ sename }} no dia {{ data }} - {{ hora }}h com temperatura ambiente de {{ temp }}°C.</p>
+    <br>
+    {% for disjuntor in press %}
+        <p>{{ disjuntor }}</p>
+    {% endfor %}
+    <br><br>
+    <p><strong>enviado com RegistraBGI.</strong></p>
+</body>
+</html>

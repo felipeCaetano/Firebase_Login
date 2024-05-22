@@ -1,10 +1,13 @@
 import flet as ft
 
 from email_server import EmailService
-from generalcontrols import body_style, Input, InputWithSuffix, Button, PickDate, TimePicker
+from generalcontrols import body_style, Input, InputWithSuffix, Button, \
+    PickDate, TimePicker
 from views.disjuntor_view import Disjuntor
 
 from daos.disjuntor_dao import DisjuntorDAO
+
+from app.generalcontrols import LeadingLine
 
 
 class Controller:
@@ -13,15 +16,43 @@ class Controller:
 
     def process_form(self):
         try:
-            data, hora, temp, press1, press2, press3 = self.ui.get_form_fields()
-            return True, data, hora, temp, press1, press2, press3
+            fields = self.get_form_fields()
+            return True, *fields
         except Exception as e:
             self.ui.page.snack_bar = ft.SnackBar(
                 content=ft.Text(str(e))
             )
             self.ui.page.snack_bar.open = True
             self.ui.page.update()
-            return False, None, None, None, None, None, None
+            return False, *(None,) * len(fields)
+
+    def get_form_fields(self):
+        fields = []
+
+        def extract_fields(controls):
+            for control in controls:
+                if isinstance(control, ft.TextField):
+                    fields.append(control.value)
+                elif isinstance(control, Disjuntor):
+                    fields.append(control)
+                elif hasattr(control, 'controls'):
+                    extract_fields(control.controls)
+
+        extract_fields(self.ui.content.controls)
+        return fields
+
+    def clear_fields(self):
+        def clear(controls):
+            for control in controls:
+                if isinstance(control, ft.TextField):
+                    control.value = ""
+                elif isinstance(control, Disjuntor):
+                    control.clear_press()
+                elif hasattr(control, 'controls'):
+                    clear(control.controls)
+
+        clear(self.ui.content.controls)
+        self.ui.page.update()
 
 
 class PressureFormUI(ft.Container):
@@ -39,7 +70,7 @@ class PressureFormUI(ft.Container):
         self.page.overlay.append(self.date_picker)
         self.page.update()
         controls_list = self.create_controls(sename)
-        self.content = ft.Column(controls=controls_list)
+        self.content = controls_list
 
     def customize_appbar(self, sename):
         self.appbar.leading = ft.IconButton(ft.icons.MENU)
@@ -48,76 +79,17 @@ class PressureFormUI(ft.Container):
 
     def create_controls(self, sename):
         contols_list = ft.Column()
-        suffix_button = ft.IconButton(
-            ft.icons.CALENDAR_TODAY,
-            on_click=lambda _: self.date_picker.pick_date()
+        dao = DisjuntorDAO()
+        contols_list.controls.append(
+            LeadingLine(self.date_picker, self.time_picker)
         )
-        date_field = InputWithSuffix(suffix_button)
-        if sename == "BGI":
-            pass
-        if sename == "JRM":
-            dao = DisjuntorDAO()
-            disjuntor_list = dao.get_disjuntores()
-            contols_list.controls = [
-                ft.Row(
-                    controls=[
-                        ft.Column(expand=2,
-                                  controls=[
-                                      ft.Text("Data"),
-                                      date_field
-                                  ]),
-                        ft.Column(expand=2,
-                                  controls=[
-                                      ft.Text("Hora"),
-                                      InputWithSuffix(
-                                          ft.IconButton(
-                                              icon=ft.icons.ACCESS_TIME,
-                                              on_click=lambda
-                                                  _: self.time_picker.pick_time()
-                                          )
-                                      )
-                                  ]),
-                        ft.Column(
-                            expand=1,
-                            controls=[
-                                ft.Text("Temperatura"),
-                                Input(password=False)
-                            ]
-                        ),
-                    ]
-                ),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                Disjuntor("14V6", 3),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                Disjuntor("12T3", 1),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                Disjuntor("12M7", 1),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-            ]
-            return contols_list.controls
-
-    def get_form_fields(self):
-        press1 = press2 = press3 = None
-        data = self.content.controls[0].controls[0].controls[1].value
-        hora = self.content.controls[0].controls[1].controls[1].value
-        temp = self.content.controls[0].controls[2].controls[1].value
-        disj1: Disjuntor = self.content.controls[2]
-        print("DISJUNTOR: ", disj1)
-        disj2: Disjuntor = self.content.controls[4]
-        disj3: Disjuntor = self.content.controls[6]
-        press1 = disj1.get_press()
-        press2 = disj2.get_press()
-        press3 = disj3.get_press()
-        return data, hora, temp, press1, press2, press3
-
-    def clear_fields(self):
-        self.content.controls[0].controls[0].controls[1].value = ""
-        self.content.controls[0].controls[1].controls[1].value = ""
-        self.content.controls[0].controls[2].controls[1].value = ""
-        self.content.controls[2].clear_press()
-        self.content.controls[4].clear_press()
-        self.content.controls[6].clear_press()
-        self.page.update()
+        disjuntor_list = dao.get_disjuntores_by_se(sename)
+        for disjuntor in disjuntor_list:
+            contols_list.controls.extend(
+                [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                 Disjuntor(disjuntor[2], disjuntor[3])]
+            )
+        return contols_list
 
 
 class InspectionPage(ft.View):
@@ -130,13 +102,19 @@ class InspectionPage(ft.View):
         self.supabase = supabase
         self.sename = sename
         self.page.appbar = ft.AppBar(bgcolor=ft.colors.GREEN)
-        self.body = PressureFormUI(self.page, self.date_input_update, self.time_input_update, sename)
+        self.body = PressureFormUI(
+            self.page,
+            self.date_input_update,
+            self.time_input_update,
+            self.page.data
+        )
         self.controller = Controller(self.body)
         self.email_service = EmailService()
         self.controls = [
             self.page.appbar,
             self.body,
             ft.Row(controls=[Button("Enviar", self.save_form)])]
+        self.page.update()
 
     def date_input_update(self, event):
         date_input = self.body.content.controls[0].controls[0].controls[1]
@@ -150,7 +128,8 @@ class InspectionPage(ft.View):
         time_input.update()
 
     def save_form(self, event):
-        status, data, hora, temp, press1, press2, press3 = self.controller.process_form()
+        status, data, hora, temp, *press = self.controller.process_form()
         if status:
-            self.email_service.send_mail(self.sename, data, hora, temp, press1, press2, press3)
-            self.body.clear_fields()
+            print(data, hora, temp, *press)
+            self.email_service.send_mail(self.sename, data, hora, temp, press)
+            self.controller.clear_fields()

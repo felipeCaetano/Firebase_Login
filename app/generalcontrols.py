@@ -24,6 +24,32 @@ class InputWithSuffix(ft.TextField):
         super().__init__(**input_style, suffix=suffix)
 
 
+class LeadingLine(ft.Row):
+    date_suffix_button = ft.IconButton(ft.icons.CALENDAR_TODAY)
+    time_suffix_button = ft.IconButton(ft.icons.ACCESS_TIME)
+    date_field = InputWithSuffix(date_suffix_button)
+    time_field = InputWithSuffix(time_suffix_button)
+
+    def __init__(self, date_picker: ft.DatePicker, time_picker: ft.TimePicker):
+        super().__init__()
+        self.date_picker = date_picker
+        self.time_picker = time_picker
+        self.date_field.suffix.on_click = self.on_pick_date
+        self.time_field.suffix.on_click = self.on_pick_time
+        self.controls = [
+            ft.Column(expand=2, controls=[ft.Text("Data"), self.date_field]),
+            ft.Column(expand=2, controls=[ft.Text("Hora"), self.time_field]),
+            ft.Column(expand=1,
+                      controls=[ft.Text("Temp."), Input(password=False)])
+        ]
+
+    def on_pick_date(self, event):
+        self.date_picker.pick_date()
+
+    def on_pick_time(self, event):
+        self.time_picker.pick_time()
+
+
 button_style = {
     "expand": True,
     "height": 38,
@@ -39,8 +65,6 @@ class Button(ft.ElevatedButton):
 
 
 body_style = {
-    # "width": 400,
-    # "height": 420,
     "border_radius": 8,
     "padding": 0,
 }
@@ -90,8 +114,6 @@ class Body(ft.Container):
                        ]),
             ]
         )
-        # self.width = 280
-        # self.height = 600
         self.padding = 12
         self.border_radius = 35
         self.gradient = ft.LinearGradient(
@@ -144,3 +166,17 @@ class NavigationDrawer(ft.NavigationDrawer):
                 selected_icon=ft.icons.PHONE,
             ),
         ]
+
+
+class InspectionTile(ft.TextButton):
+    def __init__(self, index, function):
+        super().__init__(
+            style=ft.ButtonStyle(shape=ft.ContinuousRectangleBorder())
+        )
+        self.content = ft.ListTile(
+            leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
+            title=ft.Text(f"{index}/05/2024"),
+            subtitle=ft.Text("Inspeção Realizada"),
+            hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
+            on_click=function,
+        )
