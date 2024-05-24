@@ -145,14 +145,14 @@ class TimePicker(ft.TimePicker):
 
 
 class NavigationDrawer(ft.NavigationDrawer):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, on_change):
+        super().__init__(on_change=on_change)
         self.controls = [
             ft.Container(height=12),
             ft.NavigationDrawerDestination(
-                label="Item 1",
-                icon=ft.icons.DOOR_BACK_DOOR_OUTLINED,
-                selected_icon_content=ft.Icon(ft.icons.DOOR_BACK_DOOR),
+                label="Cadastrar Disjunttores",
+                icon=ft.icons.DYNAMIC_FORM_OUTLINED,
+                selected_icon_content=ft.Icon(ft.icons.DYNAMIC_FORM),
             ),
             ft.Divider(thickness=2),
             ft.NavigationDrawerDestination(

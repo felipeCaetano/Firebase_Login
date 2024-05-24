@@ -4,6 +4,7 @@ from generalcontrols import body_style
 
 from app.controllers.bodycontroller import ViewerRegBodyController, \
     MainPageController
+from app.generalcontrols import NavigationDrawer
 
 
 class ViewerRegBody(ft.Container):
@@ -77,7 +78,7 @@ class MainPage(ft.View):
             horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         self.page = page
         self.supabase = supabase
-        self.drawer = ft.NavigationDrawer()
+        self.drawer = NavigationDrawer(on_change=self.on_nav_change)
         self.page.appbar = ft.AppBar()
         self.page.appbar.leading = ft.IconButton(ft.icons.MENU,
                                                  on_click=self.show_drawer)
@@ -91,6 +92,18 @@ class MainPage(ft.View):
         self.spacing = 0
         self.padding = 0
         self.controller = MainPageController(self)
+
+    def create_nav_drawer(self):
+        return ft.NavigationDrawer(
+
+        )
+
+    def on_nav_change(self, event):
+        self.drawer.open = False
+        self.drawer.update()
+        print("clicaram", self.drawer.selected_index)
+        self.page.route = "/cadastrar-disj"
+        self.page.go(self.page.route)
 
     def new_inspection(self, event):
         tab_name = self.body.controller.get_tab_name()

@@ -14,7 +14,7 @@ class DisjuntorPage(ft.View):
         self.supabase = supabase
         self.controller = DisjuntorController()
         self.page.appbar = self.customize_appbar()
-        self.drawer = NavigationDrawer()
+        self.drawer = NavigationDrawer(on_change=None)
         self.body = ft.Column()
         self.controls = [
             self.page.appbar,
