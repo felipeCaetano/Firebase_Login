@@ -48,24 +48,6 @@ class ViewerRegBody(ft.Container):
         self.controller = ViewerRegBodyController(self)
         self.controller.populate_list_view()
 
-    # def populate_list_view(self):
-    #     """fake method."""
-    #     for i in range(9):
-    #         list_tile = ft.TextButton(
-    #             style=ft.ButtonStyle(
-    #                 shape=ft.ContinuousRectangleBorder()
-    #             ),
-    #             content=ft.ListTile(
-    #                 leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
-    #                 title=ft.Text(f"{9 - i}/05/2024"),
-    #                 subtitle=ft.Text("Inspeção Realizada"),
-    #                 hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
-    #                 on_click=self.item_clicked,
-    #             )
-    #         )
-    #         self.content.controls[1].controls[0].tabs[
-    #             0].content.controls.append(list_tile)
-
     def item_clicked(self, event):
         self.controller.item_clicked(event)
 
@@ -79,11 +61,7 @@ class MainPage(ft.View):
         self.page = page
         self.supabase = supabase
         self.drawer = NavigationDrawer(on_change=self.on_nav_change)
-        self.page.appbar = ft.AppBar()
-        self.page.appbar.leading = ft.IconButton(ft.icons.MENU,
-                                                 on_click=self.show_drawer)
-        self.page.appbar.title = ft.Text("Leituras dos Disjuntores")
-        self.page.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+        self.page.appbar = self.create_appbar()
         self.page.floating_action_button = ft.FloatingActionButton(
             icon=ft.icons.ADD, on_click=self.new_inspection)
         self.body = ViewerRegBody(self.page.appbar)
@@ -93,9 +71,18 @@ class MainPage(ft.View):
         self.padding = 0
         self.controller = MainPageController(self)
 
+    def create_appbar(self):
+        appbar = ft.AppBar()
+        appbar.leading = ft.IconButton(
+            ft.icons.MENU,
+            on_click=self.show_drawer
+        )
+        appbar.title = ft.Text("Leituras dos Disjuntores")
+        appbar.bgcolor = ft.colors.GREEN_ACCENT_100
+        return appbar
+
     def create_nav_drawer(self):
         return ft.NavigationDrawer(
-
         )
 
     def on_nav_change(self, event):

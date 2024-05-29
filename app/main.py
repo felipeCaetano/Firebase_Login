@@ -43,7 +43,14 @@ def main(page: ft.Page):
 
         page.update()
 
+    def view_pop(event):
+        page.views.pop()
+        top_view = page.views[-1]
+        page.go(top_view.route)
+
     page.on_route_change = route_change
+    page.on_view_pop = view_pop
+
     page.go("/view-reg")
 
 

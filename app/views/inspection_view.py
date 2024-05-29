@@ -73,7 +73,7 @@ class PressureFormUI(ft.Container):
         self.content = controls_list
 
     def customize_appbar(self, sename):
-        self.appbar.leading = ft.IconButton(ft.icons.MENU)
+        # self.appbar.leading = ft.IconButton(ft.icons.MENU)
         self.appbar.title = ft.Text(f"SE {sename} Cadastrar Leituras")
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
 
