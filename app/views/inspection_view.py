@@ -11,17 +11,39 @@ from app.generalcontrols import LeadingLine
 
 
 class Controller:
-    def __init__(self, form):
+    def __init__(self, form, sename):
         self.ui = form
+        self.sename = sename
+
+    def create_controls(self):
+        controls_list = ft.Column()
+        disjuntor_list = self.get_disjuntors_list()
+        if disjuntor_list:
+            controls_list.controls.append(
+                LeadingLine(self.ui.date_picker, self.ui.time_picker)
+            )
+            for disjuntor in disjuntor_list:
+                controls_list.controls.extend(
+                    [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                     Disjuntor(disjuntor[2], disjuntor[3])]
+                )
+            else:
+                controls_list.controls.append(
+                    ft.Text("Não existem Disjuntores Cadastrados.")
+                )
+        self.ui.content.controls = controls_list.controls
+
+    def get_disjuntors_list(self):
+        dao = DisjuntorDAO()
+        disjuntor_list = dao.get_disjuntores_by_se(self.sename)
+        return disjuntor_list
 
     def process_form(self):
         try:
             fields = self.get_form_fields()
             return True, *fields
         except Exception as e:
-            self.ui.page.snack_bar = ft.SnackBar(
-                content=ft.Text(str(e))
-            )
+            self.ui.page.snack_bar = ft.SnackBar(content=ft.Text(str(e)))
             self.ui.page.snack_bar.open = True
             self.ui.page.update()
             return False, *(None,) * len(fields)
@@ -69,27 +91,29 @@ class PressureFormUI(ft.Container):
         self.page.overlay.append(self.time_picker)
         self.page.overlay.append(self.date_picker)
         self.page.update()
-        controls_list = self.create_controls(sename)
-        self.content = controls_list
+        # controls_list = self.create_controls(sename)
+        self.content = ft.Column()
 
     def customize_appbar(self, sename):
-        # self.appbar.leading = ft.IconButton(ft.icons.MENU)
-        self.appbar.title = ft.Text(f"SE {sename} Cadastrar Leituras")
+        self.appbar.title = ft.Text(
+            f"SE {sename} Cadastrar Leituras",
+            size=14
+        )
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
 
-    def create_controls(self, sename):
-        contols_list = ft.Column()
-        dao = DisjuntorDAO()
-        contols_list.controls.append(
-            LeadingLine(self.date_picker, self.time_picker)
-        )
-        disjuntor_list = dao.get_disjuntores_by_se(sename)
-        for disjuntor in disjuntor_list:
-            contols_list.controls.extend(
-                [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-                 Disjuntor(disjuntor[2], disjuntor[3])]
-            )
-        return contols_list
+    # def create_controls(self, sename):
+    #     contols_list = ft.Column()
+    #     dao = DisjuntorDAO()
+    #     disjuntor_list = dao.get_disjuntores_by_se(sename)
+    #     contols_list.controls.append(
+    #         LeadingLine(self.date_picker, self.time_picker)
+    #     )
+    #     for disjuntor in disjuntor_list:
+    #         contols_list.controls.extend(
+    #             [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+    #              Disjuntor(disjuntor[2], disjuntor[3])]
+    #         )
+    #     return contols_list
 
 
 class InspectionPage(ft.View):
@@ -108,7 +132,8 @@ class InspectionPage(ft.View):
             self.time_input_update,
             self.page.data
         )
-        self.controller = Controller(self.body)
+        self.controller = Controller(self.body, self.sename)
+        self.controller.create_controls()
         self.email_service = EmailService()
         self.controls = [
             self.page.appbar,

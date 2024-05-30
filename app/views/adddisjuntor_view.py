@@ -13,19 +13,32 @@ class DisjuntorPage(ft.View):
         self.page = page
         self.supabase = supabase
         self.controller = DisjuntorController()
-        self.page.appbar = self.customize_appbar()
+        self.appbar = self.create_appbar()
+        self.page.appbar = self.appbar
+        self.page.update()
         self.drawer = NavigationDrawer(on_change=None)
         self.body = ft.Column()
         self.controls = [
             self.page.appbar,
             self.body,
-            ft.Row(controls=[
-                Button(
-                    "Adicionar Disjuntor",
-                    self.add_disjuntor_form)]
+            ft.Row(
+                controls=[
+                    Button("Adicionar Disjuntor", self.add_disjuntor_form)
+                ]
             )
         ]
         self.load_disjuntores()
+
+    def create_appbar(self):
+        return ft.AppBar(
+            leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=self.go_back),
+            title=ft.Text("Cadastrar Disjuntores"),
+            bgcolor=ft.colors.GREEN_ACCENT_100
+        )
+
+    def go_back(self, event):
+        self.page.route = "/view-reg"
+        self.page.go(self.page.route)
 
     def load_disjuntores(self):
         self.body.controls.clear()
@@ -64,40 +77,7 @@ class DisjuntorPage(ft.View):
                         )),
                     ])
                 )
-
             self.body.controls.append(table)
-            # self.body.controls.append(ft.Divider(height=10))
-            # self.body.controls.append(ft.Divider(height=10))
-            # self.body.controls.append(ft.Container(
-            #     content=ft.Column(
-            #         controls=[
-            #             ft.Text(f"Subestação: {disjuntor[1]}"),
-            #             ft.Text(f"Disjuntor: {disjuntor[2]}"),
-            #             ft.Text(f"Pressostatos: {disjuntor[3]}"),
-            #             ft.Text(
-            #                 f"Pressão Nominal: {disjuntor[4]}"),
-            #             ft.Row(
-            #                 controls=[
-            #                     Button(
-            #                         "Editar",
-            #                         lambda e,
-            #                                d=disjuntor: self.edit_disjuntor_form(e, d)
-            #                     ),
-            #                     Button(
-            #                         "Deletar",
-            #                         lambda e,d=disjuntor: self.delete_disjuntor(e, d)
-            #                     ),
-            #                     Button(
-            #                         "Complementações",
-            #                         lambda e,
-            #                                d=disjuntor: self.view_complementacoes(
-            #                             e, d)
-            #                     ),
-            #                 ]
-            #             )
-            #         ]
-            #     )
-            # ))
         else:
             self.body.controls.append(
                 ft.Container(
@@ -123,7 +103,7 @@ class DisjuntorPage(ft.View):
             ]),
             actions=[
                 Button("Cancelar",
-                       lambda e: self.page.dialog.dismiss()),
+                       lambda e: self.page.dialog.on_dismiss),
                 Button("Salvar", self.save_disjuntor),
             ],
             actions_alignment=ft.MainAxisAlignment.CENTER
@@ -207,15 +187,15 @@ class DisjuntorPage(ft.View):
                 Button("Fechar",
                        lambda e: self.page.dialog.on_dismiss),
                 Button("Adicionar Complementação",
-                       lambda e, d=disjuntor: self.add_complementacao_form(e,
-                                                                           d)),
+                       lambda e, d=disjuntor: self.add_complement_form(e, d)
+                       ),
             ],
         )
         self.page.dialog = dialog
         dialog.open = True
         self.page.update()
 
-    def add_complementacao_form(self, event, disjuntor):
+    def add_complement_form(self, event, disjuntor):
         dialog = ft.AlertDialog(
             title=ft.Text("Adicionar Complementação"),
             content=ft.Column(controls=[
@@ -224,18 +204,21 @@ class DisjuntorPage(ft.View):
                 ft.TextField(label="Setor"),
             ]),
             actions=[
-                ft.Button("Cancelar",
-                          on_click=lambda e: self.page.dialog.dismiss()),
-                ft.Button("Salvar", on_click=lambda e,
-                                                    d=disjuntor: self.save_complementacao(
-                    e, d)),
+                ft.Button(
+                    "Cancelar",
+                    on_click=lambda e: self.page.dialog.on_dismiss
+                ),
+                ft.Button(
+                    "Salvar",
+                    on_click=lambda e, d=disjuntor: self.save_complement(e, d)
+                ),
             ],
         )
         self.page.dialog = dialog
         dialog.open = True
         self.page.update()
 
-    def save_complementacao(self, event, disjuntor):
+    def save_complement(self, event, disjuntor):
         data_complementacao = self.page.dialog.content.controls[0].value
         tecnico = self.page.dialog.content.controls[1].value
         setor = self.page.dialog.content.controls[2].value
@@ -243,15 +226,3 @@ class DisjuntorPage(ft.View):
                                            tecnico, setor)
         self.page.dialog.dismiss()
         self.view_complementacoes(event, disjuntor)
-
-    def customize_appbar(self):
-        return ft.AppBar(
-            elevation_on_scroll=6,
-            title=ft.Text("Cadastrar Disjuntores"),
-            bgcolor=ft.colors.GREEN_ACCENT_100,
-            leading=ft.IconButton(ft.icons.MENU, on_click=self.show_drawer)
-        )
-
-    def show_drawer(self, event):
-        self.drawer.open = True
-        self.drawer.update()

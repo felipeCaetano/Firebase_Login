@@ -88,7 +88,6 @@ class MainPage(ft.View):
     def on_nav_change(self, event):
         self.drawer.open = False
         self.drawer.update()
-        print("clicaram", self.drawer.selected_index)
         self.page.route = "/cadastrar-disj"
         self.page.go(self.page.route)
 
