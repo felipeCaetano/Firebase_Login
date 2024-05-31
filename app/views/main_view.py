@@ -2,9 +2,8 @@ import flet as ft
 
 from generalcontrols import body_style
 
-from app.controllers.bodycontroller import ViewerRegBodyController, \
-    MainPageController
-from app.generalcontrols import NavigationDrawer
+from controllers.bodycontroller import MainPageController
+from generalcontrols import NavigationDrawer
 
 
 class ViewerRegBody(ft.Container):
@@ -45,8 +44,6 @@ class ViewerRegBody(ft.Container):
             end=ft.alignment.bottom_center,
             colors=[ft.colors.WHITE, ft.colors.GREEN_50],
         )
-        self.controller = ViewerRegBodyController(self)
-        self.controller.populate_list_view()
 
     def item_clicked(self, event):
         self.controller.item_clicked(event)
@@ -67,9 +64,11 @@ class MainPage(ft.View):
         self.body = ViewerRegBody(self.page.appbar)
         self.controls = [self.page.appbar, self.body,
                          self.page.floating_action_button]
-        self.spacing = 0
-        self.padding = 0
         self.controller = MainPageController(self)
+        self.controller.populate_list_view()
+
+    def algo_Aconteceu(self):
+        print(f'{self.page.data} aconteceu!')
 
     def create_appbar(self):
         appbar = ft.AppBar()
@@ -92,7 +91,7 @@ class MainPage(ft.View):
         self.page.go(self.page.route)
 
     def new_inspection(self, event):
-        tab_name = self.body.controller.get_tab_name()
+        tab_name = self.controller.get_tab_name()
         self.controller.new_inspection(event, tab_name)
 
     def show_drawer(self, event):

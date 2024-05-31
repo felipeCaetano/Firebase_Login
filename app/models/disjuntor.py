@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.daos.disjuntor_dao import DisjuntorDAO
+from daos.disjuntor_dao import DisjuntorDAO
 
 
 class Disjuntor:

@@ -13,7 +13,6 @@ class EmailService:
         email_server = get_email_server()
         msg = create_email_menssage(sename, data, hora, temp, press)
         try:
-            print(msg.as_string())
             email_server.sendmail(
                 os.environ["EMAIL_URL"],
                 "felipecmelo@gmail.com",

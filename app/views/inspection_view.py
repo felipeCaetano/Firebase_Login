@@ -1,17 +1,16 @@
 import flet as ft
-
+from daos.disjuntor_dao import DisjuntorDAO
 from email_server import EmailService
-from generalcontrols import body_style, Input, InputWithSuffix, Button, \
-    PickDate, TimePicker
+from generalcontrols import LeadingLine
+from generalcontrols import body_style, Button, PickDate, TimePicker
 from views.disjuntor_view import Disjuntor
 
-from daos.disjuntor_dao import DisjuntorDAO
-
-from app.generalcontrols import LeadingLine
+from daos.inspecao_dao import InspectionDAO
 
 
-class Controller:
+class InspectionController:
     def __init__(self, form, sename):
+        self.inspection_dao = InspectionDAO()
         self.ui = form
         self.sename = sename
 
@@ -27,26 +26,28 @@ class Controller:
                     [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
                      Disjuntor(disjuntor[2], disjuntor[3])]
                 )
-            else:
-                controls_list.controls.append(
-                    ft.Text("Não existem Disjuntores Cadastrados.")
-                )
+        else:
+            controls_list.controls.append(
+                ft.Text("Não existem Disjuntores Cadastrados.")
+            )
         self.ui.content.controls = controls_list.controls
 
     def get_disjuntors_list(self):
         dao = DisjuntorDAO()
-        disjuntor_list = dao.get_disjuntores_by_se(self.sename)
-        return disjuntor_list
+        return dao.get_disjuntores_by_se(self.sename)
 
     def process_form(self):
         try:
             fields = self.get_form_fields()
             return True, *fields
         except Exception as e:
-            self.ui.page.snack_bar = ft.SnackBar(content=ft.Text(str(e)))
-            self.ui.page.snack_bar.open = True
-            self.ui.page.update()
+            self.show_snackbar(str(e))
             return False, *(None,) * len(fields)
+
+    def show_snackbar(self, e):
+        self.ui.page.snack_bar = ft.SnackBar(content=ft.Text(str(e)))
+        self.ui.page.snack_bar.open = True
+        self.ui.page.update()
 
     def get_form_fields(self):
         fields = []
@@ -76,6 +77,9 @@ class Controller:
         clear(self.ui.content.controls)
         self.ui.page.update()
 
+    def save_to_db(self, sename, data, hora, temp, press):
+        self.inspection_dao.add_inspection(sename, data, hora, temp, press)
+
 
 class PressureFormUI(ft.Container):
     def __init__(self, page, date_update, time_update, sename="SE BGI"):
@@ -91,7 +95,6 @@ class PressureFormUI(ft.Container):
         self.page.overlay.append(self.time_picker)
         self.page.overlay.append(self.date_picker)
         self.page.update()
-        # controls_list = self.create_controls(sename)
         self.content = ft.Column()
 
     def customize_appbar(self, sename):
@@ -101,23 +104,9 @@ class PressureFormUI(ft.Container):
         )
         self.appbar.bgcolor = ft.colors.GREEN_ACCENT_100
 
-    # def create_controls(self, sename):
-    #     contols_list = ft.Column()
-    #     dao = DisjuntorDAO()
-    #     disjuntor_list = dao.get_disjuntores_by_se(sename)
-    #     contols_list.controls.append(
-    #         LeadingLine(self.date_picker, self.time_picker)
-    #     )
-    #     for disjuntor in disjuntor_list:
-    #         contols_list.controls.extend(
-    #             [ft.Divider(height=10, color=ft.colors.TRANSPARENT),
-    #              Disjuntor(disjuntor[2], disjuntor[3])]
-    #         )
-    #     return contols_list
-
 
 class InspectionPage(ft.View):
-    def __init__(self, page: ft.Page, supabase, sename="JRM"):
+    def __init__(self, page: ft.Page, supabase, sename="BGI"):
         super().__init__(
             route="/cadastrar-insp",
             vertical_alignment=ft.MainAxisAlignment.CENTER,
@@ -132,13 +121,14 @@ class InspectionPage(ft.View):
             self.time_input_update,
             self.page.data
         )
-        self.controller = Controller(self.body, self.sename)
+        self.controller = InspectionController(self.body, self.sename)
         self.controller.create_controls()
         self.email_service = EmailService()
-        self.controls = [
-            self.page.appbar,
-            self.body,
-            ft.Row(controls=[Button("Enviar", self.save_form)])]
+        self.controls = [self.page.appbar, self.body]
+        if len(self.body.content.controls) > 1:
+            self.controls.append(
+                ft.Row(controls=[Button("Enviar", self.save_form)])
+            )
         self.page.update()
 
     def date_input_update(self, event):
@@ -155,6 +145,18 @@ class InspectionPage(ft.View):
     def save_form(self, event):
         status, data, hora, temp, *press = self.controller.process_form()
         if status:
-            print(data, hora, temp, *press)
-            self.email_service.send_mail(self.sename, data, hora, temp, press)
+            # self.email_service.send_mail(self.sename, data, hora, temp, press)
+            self.controller.save_to_db(self.sename, data, hora, temp, press)
             self.controller.clear_fields()
+            self.page.data = {
+                "data": data,
+                "hora": hora,
+                "temp": temp,
+                "press": press
+            }
+            self.page.update()
+            self.page.views.pop()
+            top_view = self.page.views[-1]
+            top_view.controller.populate_list_view()
+            self.page.go(top_view.route)
+

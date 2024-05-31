@@ -32,6 +32,16 @@ def create_table():
                 FOREIGN KEY(disjuntor_id) REFERENCES disjuntor(id)
             )
         ''')
+        cursor.execute('''
+                CREATE TABLE IF NOT EXISTS inspecoes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sename TEXT,
+                    data TEXT,
+                    hora TEXT,
+                    temp TEXT,
+                    press TEXT
+                )
+        ''')
         conn.commit()
 
 

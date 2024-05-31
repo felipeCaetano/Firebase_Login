@@ -3,8 +3,8 @@ from gotrue.errors import AuthApiError
 
 from generalcontrols import Body
 
-from app.auth import AuthService
-from app.controllers.login_controller import LogInController
+from auth import AuthService
+from controllers.login_controller import LogInController
 
 
 class LogInPage(ft.View):
@@ -34,6 +34,7 @@ class LogInPage(ft.View):
             bgcolor=ft.colors.BLACK
         )
         self.page.snack_bar.open = True
+        self.page.update()
 
     def handle_login(self, event):
         email_value = self.body.email.value

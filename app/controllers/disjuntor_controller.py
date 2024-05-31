@@ -1,4 +1,4 @@
-from app.models.disjuntor import Disjuntor
+from models.disjuntor import Disjuntor
 
 
 class DisjuntorController:

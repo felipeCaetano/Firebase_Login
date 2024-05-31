@@ -1,6 +1,6 @@
 import flet as ft
-from app.controllers.disjuntor_controller import DisjuntorController
-from app.generalcontrols import Button, NavigationDrawer
+from controllers.disjuntor_controller import DisjuntorController
+from generalcontrols import Button, NavigationDrawer
 
 
 class DisjuntorPage(ft.View):
