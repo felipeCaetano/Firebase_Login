@@ -169,13 +169,14 @@ class NavigationDrawer(ft.NavigationDrawer):
 
 
 class InspectionTile(ft.TextButton):
-    def __init__(self, index, function):
+    def __init__(self, inspection, function):
         super().__init__(
             style=ft.ButtonStyle(shape=ft.ContinuousRectangleBorder())
         )
+        self.inspection = inspection
         self.content = ft.ListTile(
             leading=ft.CircleAvatar(content=ft.Text(f"{"FC"}")),
-            title=ft.Text(f"{index}/05/2024"),
+            title=ft.Text(f"{inspection[2]}"),
             subtitle=ft.Text("Inspeção Realizada"),
             hover_color=ft.colors.LIGHT_BLUE_ACCENT_100,
             on_click=function,
